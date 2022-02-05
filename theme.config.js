@@ -2,12 +2,15 @@ const YEAR = new Date().getFullYear()
 
 export default {
   footer: (
-    <small style={{ display: 'block', marginTop: '8rem' }}>
-      <time>{YEAR}</time> © Your Name.
-      <a href="/feed.xml">RSS</a>
+    <p style={{ display: 'block', marginTop: '8rem' }}>
+      <time>{YEAR}</time> © Doan Thieu.
+      <a href="https://www.goodreads.com/user/show/25954119-thi-u" target="_blank">goodreads</a>
+      <a href="https://github.com/Thieurom" target="_blank">github</a>
+      <a href="https://twitter.com/lethieu" target="_blank">twitter</a>
       <style jsx>{`
         a {
           float: right;
+          margin: 0 0.25rem;
         }
         @media screen and (max-width: 480px) {
           article {
@@ -16,6 +19,6 @@ export default {
           }
         }
       `}</style>
-    </small>
+    </p>
   )
 }

@@ -11,7 +11,6 @@ class MyDocument extends Document {
       title: 'Thieu\'s Notes',
       description: 'Personal blog by Doan Thieu — self-taught programmer, avid reader, introvert.',
       url: 'thieus-notes.vercel.app',
-      twitter: "https://twitter.com/lethieu",
       image:
         'https://assets.vercel.com/image/upload/q_auto/front/vercel/dps.png'
     }

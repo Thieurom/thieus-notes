@@ -1,35 +1,41 @@
 ---
 title: Understanding Subscriber in Combine by re-implementing Sink
 date: 2020-06-07
+lastUpdated: 2025-04-19
+tags: ["Swift", "Combine"]
 ---
 
 # Understanding Subscriber in Combine by re-implementing Sink
 
-When we started learning Combine, the very first tutorial might be like this:
+When we first start learning Combine, the introductory example is often something like this:
 ```
 var subscriptions = Set<AnyCancellable>()
 let publisher = [1, 2, 3, 4].publisher
 
 publisher
-    .sink(receiveCompletion: { print("Received completion: \($0)") },
-         receiveValue: { print("Received value: \($0)") })
+    .sink(
+        receiveCompletion: { print("Received completion: \($0)") },
+        receiveValue: { print("Received value: \($0)") }
+    )
     .store(in: &subscriptions)
 ```
 
-This will print the following in the console:
+This prints the following to the console:
 ```
 Received value: 1
 Received value: 2
 Received value: 3
 Received value: 4
-Received comletion: finished
+Received completion: finished
 ```
 
-What `.sink` method returns is an instance of type `AnyCancellable`, which in turn is a wrapper of an instance of type `Sink`.
+The `sink` method returns an instance of `AnyCancellable`, which wraps an internal instance of type `Sink`.
 
-`Sink` together with `Assign` are built-in subscribers of Combine framework. In Apple’s documentation, `Sink` is “A simple subscriber that requests an unlimited number of values upon subscription.” In this post, we’ll try to re-implement the `Sink`, and we name it `MySink`.
+Both `Sink` and `Assign` are built-in subscribers provided by the Combine framework. According to Apple’s documentation, `Sink` is “a simple subscriber that requests an unlimited number of values upon subscription.”
+In this post, we'll re-implement `Sink` ourselves, calling it `MySink`, to better understand how `Subscriber` works under the hood.
 
-First,  it is a subscriber so it must conform to `Subscriber` protocol:
+## Step 1: Conform to Subscriber
+Because `MySink` is a subscriber, it must conform to the `Subscriber` protocol:
 ```
 final class MySink<Input, Failure>: Subscriber where Failure: Error {
     func receive(subscription: Subscription) {
@@ -47,16 +53,15 @@ final class MySink<Input, Failure>: Subscriber where Failure: Error {
 }
 ```
 
-In `receive(subscription:)` method we request an unlimited number of values as its definition. This is the initial request. In `receive(_ input:)` method we return any kind of `Demand` since the demand is additive.
+In the `receive(subscription:)` method, we request an unlimited number of values, as expected from the standard `Sink`. In `receive(_:)`, we return `none`, meaning we don’t change the demand. (Note: demand is additive in Combine.)
 
-Let’s put it on test:
+Let’s test it:
 ```
 let publisher = [1, 2, 3, 4].publisher
 let mySink1 = MySink<Int, Never>()
 publisher.subscribe(mySink1)
 ```
-
-This will print the same as the above example:
+Output
 ```
 Received value: 1
 Received value: 2
@@ -64,8 +69,10 @@ Received value: 3
 Received value: 4
 Received completion: finished
 ```
+So far, so good!
 
-Next we’ll implement the `mySink` method on `Publisher` so it works like built-in `sink` method.
+## Step 2: Create a mySink Extension
+Now let’s extend `Publisher` with a method that mimics `sink`:
 ```
 extension Publisher {
     func mySink() -> AnyCancellable {
@@ -75,15 +82,18 @@ extension Publisher {
     }
 }
 ```
-
-It will not compile with error `Initializer ‘init(_:)’ requires that ‘MySink<Self.Output, Self.Failure>’ conform to ‘Cancellable’`. We make it conform to `Cancellable` with an only required method named `cancel`:
+But this won't compile. You'll get the following error:
 ```
-final class MySink<Input, Failure>: Subscriber, Cancellable where Failure : Error {
+Initializer ’init(_:)’ requires that ‘MySink<Self.Output, Self.Failure>’ conform to ‘Cancellable’
+```
+To fix that, let’s make `MySink` conform to `Cancellable`:
+```
+final class MySink<Input, Failure>: Subscriber, Cancellable where Failure: Error {
     func cancel() {}
 }
 ```
 
-Run test again:
+Testing it again:
 ```
 Received value: 1
 Received value: 2
@@ -91,8 +101,10 @@ Received value: 3
 Received value: 4
 Received completion: finished
 ```
+It works! But let’s take it a step further.
 
-Let’s try another:
+## Step 3: Support Cancellation Properly
+Let’s try using a `PassthroughSubject` instead:
 ```
 let subject = PassthroughSubject<String, Never>()
 let mySink2 = subject.mySink()
@@ -101,24 +113,24 @@ mySink2.store(in: &subscriptions)
 subject.send("A")
 subject.send("B")
 
-// We cancel the subcription here
+// Cancel the subscription
 mySink2.cancel()
 subject.send("C")
 ```
 
-The console prints:
+Console output:
 ```
 Received value: A
 Received value: B
 Received value: C
 ```
+Something's wrong! We’re still receiving values after cancellation!
 
-Something’s wrong! We keep getting value emitted by `subject` even we canceled it.  When we call `cancel` on the `mySink2` it has to notify the Publisher it subscribed to that it no longer wants to receive any value. To do that we need to keep a reference for the subscription when Publisher gives it to us.
+That’s because our `cancel()` method doesn’t inform the publisher that we want to stop. To fix this, we need to store the Subscription instance and cancel it properly:
 ```
-final class MySink<Input, Failure>: Subscriber, Cancellable where Failure : Error {
+final class MySink<Input, Failure>: Subscriber, Cancellable where Failure: Error {
     private var subscription: Subscription?
 
-      // ...
     func receive(subscription: Subscription) {
         self.subscription = subscription
         subscription.request(.unlimited)
@@ -128,29 +140,40 @@ final class MySink<Input, Failure>: Subscriber, Cancellable where Failure : Erro
         subscription?.cancel()
         subscription = nil
     }
+
+    // Other methods remain the same...
 }
 ```
 
-Run code again:
+Now when we run the code:
 ```
 Received value: A
 Received value: B
 ```
+Perfect.
 
-It’s almost done now.  However, whenever we get the emitted values or completion event, we just print it out. We should allow the subscriber can do anything with those events. Update class `MySink` as follow, as noted that we should put it in the `Subscribers` namespace:
+## Step 4: Make MySink More Flexible
+So far, we’re just printing values. But we want to allow custom behavior like the original sink. Let's update `MySink` to accept closures:
 ```
-final class MySink<Input, Failure>: Subscriber, Cancellable where Failure : Error {
+final class MySink<Input, Failure>: Subscriber, Cancellable where Failure: Error {
     private let receiveCompletion: (Subscribers.Completion<Failure>) -> Void
     private let receiveValue: (Input) -> Void
     private var subscription: Subscription?
     
-    init(receiveCompletion: @escaping ((Subscribers.Completion<Failure>) -> Void),
-         receiveValue: @escaping ((Input) -> Void)) {
+    init(
+        receiveCompletion: @escaping (Subscribers.Completion<Failure>) -> Void,
+        receiveValue: @escaping (Input) -> Void
+    ) {
         self.receiveValue = receiveValue
         self.receiveCompletion = receiveCompletion
     }
+    
+    func receive(subscription: Subscription) {
+        self.subscription = subscription
+        subscription.request(.unlimited)
+    }
 
-func receive(_ input: Input) -> Subscribers.Demand {
+    func receive(_ input: Input) -> Subscribers.Demand {
         receiveValue(input)
         return .none
     }
@@ -159,19 +182,32 @@ func receive(_ input: Input) -> Subscribers.Demand {
         receiveCompletion(completion)
         subscription = nil
     }
+
+    func cancel() {
+        subscription?.cancel()
+        subscription = nil
+    }
 }
 ```
 
-We need to update method `mySink` as well:
+And don’t forget to update the `mySink` extension:
 ```
-func mySink(receiveCompletion: @escaping (Subscribers.Completion<Failure>) -> Void, receiveValue: @escaping (Output) -> Void) -> AnyCancellable {
-    let sink = MySink<Output, Failure>(
-        receiveCompletion: receiveCompletion,
-        receiveValue: receiveValue)
-        
-    subscribe(sink)
-    return AnyCancellable(sink)
+extension Publisher {
+    func mySink(
+        receiveCompletion: @escaping (Subscribers.Completion<Failure>) -> Void,
+        receiveValue: @escaping (Output) -> Void
+    ) -> AnyCancellable {
+        let sink = MySink<Output, Failure>(
+            receiveCompletion: receiveCompletion,
+            receiveValue: receiveValue
+        )
+        subscribe(sink)
+        return AnyCancellable(sink)
+    }
 }
 ```
 
-So that’s it. We complete reimplementing the `Sink` and `sink` of Combine. Sure the actual implementation is more complicated but it works for our learning purpose. All source code can be found [here](https://github.com/Thieurom/my-swift-playgrounds/tree/master/001-my-sink).
+## Wrapping Up
+And that’s it! We’ve re-implemented the core behavior of Combine’s `Sink` and `sink`. While the real implementation is more complex and handles more edge cases, our version captures the key ideas. Rebuilding components like this is a great way to deepen your understanding of Combine’s architecture.
+
+👉 You can find the full source code [here](https://github.com/Thieurom/my-swift-playgrounds/tree/master/001-my-sink).

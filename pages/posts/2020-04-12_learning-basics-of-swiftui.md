@@ -2,8 +2,7 @@
 title: Learning the basics of SwiftUI by writing a simple iOS app
 date: 2020-04-12
 lastUpdated: 2025-04-19
-description: 
-tags: ["Swift", "SwiftUI"]
+tag: swift, swiftui
 ---
 
 # Learning the basics of SwiftUI by writing a simple iOS app

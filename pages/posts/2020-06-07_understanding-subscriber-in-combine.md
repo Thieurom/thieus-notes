@@ -2,7 +2,7 @@
 title: Understanding Subscriber in Combine by re-implementing Sink
 date: 2020-06-07
 lastUpdated: 2025-04-19
-tags: ["Swift", "Combine"]
+tag: swift, combine
 ---
 
 # Understanding Subscriber in Combine by re-implementing Sink

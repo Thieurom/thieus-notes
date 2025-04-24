@@ -76,8 +76,8 @@ export default function Blog({ params }) {
               : `/og?title=${encodeURIComponent(post.metadata.title)}`,
             url: `${baseUrl}/posts/${post.slug}`,
             author: {
-              '@type': 'Doan Thieu',
-              name: 'Thieu\'s Notes',
+              '@type': 'Person',
+              name: 'Doan Thieu',
             },
           }),
         }}

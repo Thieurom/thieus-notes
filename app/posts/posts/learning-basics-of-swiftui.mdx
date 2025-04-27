@@ -1,0 +1,24 @@
+---
+title: Learning the basics of SwiftUI by writing a simple iOS app
+publishedAt: '2020-04-12'
+tag: swift, swiftui
+---
+
+I’m currently learning SwiftUI (and Combine).  Both new frameworks from Apple are amazing and pleasant to learn.
+
+I made an iOS app named The Airliners to practice what I've learned.  It provides brief information on the Boeing 7x7 series aircraft, with all the data I get from Wikipedia.
+
+import Image from 'next/image'
+
+<Image
+  src="/images/the-airliners-app-screens.png"
+  alt="The Airliners app screenshot"
+  width={1125}
+  height={750}
+  priority
+  className="next-image"
+/>
+
+This app is simple now; it has only two screens. For the business logic side, it just applies some SwiftUI syntax like `@State`, `@Environment`, `@ObservedObject`, etc. I plan to add more features as I learn.
+
+The source code for the app can be found [here](https://github.com/Thieurom/the-airliners).

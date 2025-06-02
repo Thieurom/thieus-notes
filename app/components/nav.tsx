@@ -10,6 +10,9 @@ const navItems = {
   '/projects': {
     name: 'projects',
   },
+  '/bookmarks': {
+    name: 'bookmarks',
+  },
 }
 
 export function Navbar() {

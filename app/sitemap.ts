@@ -1,4 +1,4 @@
-import { getBlogPosts } from 'app/posts/utils'
+import { getBlogPosts } from './posts/utils'
 
 export const baseUrl = 'https://thieus-notes.vercel.app/'
 

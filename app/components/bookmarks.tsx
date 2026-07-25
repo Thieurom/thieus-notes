@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getBookmarks } from 'app/bookmarks/bookmarks'
+import { getBookmarks } from '../bookmarks/bookmarks'
 
 export function Bookmarks() {
   let bookmarks = getBookmarks()

@@ -9,13 +9,12 @@ export function Bookmarks() {
       {bookmarks.map((bookmark, index) => (
         <li key={index}>
           <Link
+            className="text-neutral-900 dark:text-neutral-400"
             href={bookmark.url}
             rel="noopener noreferrer"
             target="_blank"
           >
-              <p className="text-neutral-900 dark:text-neutral-400">
-                {bookmark.title}
-              </p>
+            {bookmark.title}
           </Link>
         </li>
       ))}

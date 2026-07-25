@@ -1,24 +1,6 @@
 export function getProjects() {
   return [
     {
-      title: "DevSettings",
-      year: 2025,
-      description: "SwiftUI view to manage development settings in your SwiftUI application",
-      url: "https://github.com/Thieurom/DevSettings"
-    },
-    {
-      title: "JourneyLog",
-      year: 2023,
-      description: "Wrapper of os.Logger and OSLogStore to log and export log entries",
-      url: "https://github.com/Thieurom/JourneyLog"
-    },
-    {
-      title: "Landmarks",
-      year: 2023,
-      description: "Rebuild of Apple's \"Landmarks\" application using the Composable Architecture",
-      url: "https://github.com/Thieurom/Landmarks"
-    },
-    {
       title: "Pilot",
       year: 2022,
       description: "Simple HTTP network layer written in Swift",

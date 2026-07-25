@@ -21,6 +21,7 @@ export async function generateMetadata({ params }) {
   let {
     title,
     publishedAt: publishedTime,
+    updatedAt,
     summary: description,
     image,
   } = post.metadata
@@ -36,6 +37,7 @@ export async function generateMetadata({ params }) {
       description,
       type: 'article',
       publishedTime,
+      modifiedTime: updatedAt ?? publishedTime,
       url: `${baseUrl}/posts/${post.slug}`,
       images: [
         {
@@ -71,7 +73,7 @@ export default async function Blog({ params }) {
             '@type': 'BlogPosting',
             headline: post.metadata.title,
             datePublished: post.metadata.publishedAt,
-            dateModified: post.metadata.publishedAt,
+            dateModified: post.metadata.updatedAt ?? post.metadata.publishedAt,
             description: post.metadata.summary,
             image: post.metadata.image
               ? `${baseUrl}${post.metadata.image}`
@@ -90,6 +92,9 @@ export default async function Blog({ params }) {
       <div className="flex justify-between items-center mt-2 mb-8 text-sm">
         <p className="text-sm text-neutral-600 dark:text-neutral-400">
           {formatDate(post.metadata.publishedAt)}
+          {post.metadata.updatedAt && (
+            <> · Updated {formatDate(post.metadata.updatedAt)}</>
+          )}
         </p>
       </div>
       <article className="prose">

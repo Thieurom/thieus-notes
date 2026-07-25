@@ -1,10 +1,11 @@
 ---
 title: Understanding Subscriber in Combine by re-implementing Sink
 publishedAt: '2020-06-07'
+updatedAt: '2026-07-25'
 tag: swift, combine
 ---
 
-When we first start learning Combine, the introductory example is often something like this:
+When we start learning Combine, the introductory example is often something like this:
 ```swift
 var subscriptions = Set<AnyCancellable>()
 let publisher = [1, 2, 3, 4].publisher
@@ -26,10 +27,10 @@ Received value: 4
 Received completion: finished
 ```
 
-The `sink` method returns an instance of `AnyCancellable`, which wraps an internal instance of type `Sink`.
+The `sink` method returns an `AnyCancellable`. Retaining that value keeps the subscription alive, and cancelling or deinitializing it tears the subscription down.
 
-Both `Sink` and `Assign` are built-in subscribers provided by the Combine framework. According to Apple’s documentation, `Sink` is “a simple subscriber that requests an unlimited number of values upon subscription.”
-In this post, we'll re-implement `Sink` ourselves, calling it `MySink`, to better understand how `Subscriber` works under the hood.
+Combine provides the `Subscribers.Sink` and `Subscribers.Assign` subscriber types through publisher operators. `sink` is a simple, closure-based subscriber that requests unlimited demand when it receives a subscription.
+In this post, we’ll re-implement the core behavior of `Subscribers.Sink`, calling our version `MySink`, to better understand how `Subscriber` works under the hood.
 
 ## Step 1: Conform to Subscriber
 Because `MySink` is a subscriber, it must conform to the `Subscriber` protocol:
@@ -50,7 +51,7 @@ final class MySink<Input, Failure>: Subscriber where Failure: Error {
 }
 ```
 
-In the `receive(subscription:)` method, we request an unlimited number of values, as expected from the standard `Sink`. In `receive(_:)`, we return `none`, meaning we don’t change the demand. (Note: demand is additive in Combine.)
+In the `receive(subscription:)` method, we request an unlimited number of values, as expected from the standard `Subscribers.Sink`. In `receive(_:)`, we return `.none`, which adds no further demand. Demand is additive in Combine.
 
 Let’s test it:
 ```swift
@@ -68,7 +69,7 @@ Received completion: finished
 ```
 So far, so good!
 
-## Step 2: Create a mySink Extension
+## Step 2: Create a `mySink` Extension
 Now let’s extend `Publisher` with a method that mimics `sink`:
 ```swift
 extension Publisher {
@@ -79,7 +80,7 @@ extension Publisher {
     }
 }
 ```
-But this won't compile. You'll get the following error:
+However, this won’t compile. You’ll get the following error:
 ```
 Initializer ’init(_:)’ requires that ‘MySink<Self.Output, Self.Failure>’ conform to ‘Cancellable’
 ```
@@ -123,7 +124,7 @@ Received value: C
 ```
 Something's wrong! We’re still receiving values after cancellation!
 
-That’s because our `cancel()` method doesn’t inform the publisher that we want to stop. To fix this, we need to store the Subscription instance and cancel it properly:
+That’s because our `cancel()` method doesn’t inform the publisher that we want to stop. To fix this, we need to store the `Subscription` instance and cancel it properly:
 ```swift
 final class MySink<Input, Failure>: Subscriber, Cancellable where Failure: Error {
     private var subscription: Subscription?
@@ -142,7 +143,7 @@ final class MySink<Input, Failure>: Subscriber, Cancellable where Failure: Error
 }
 ```
 
-Now when we run the code:
+Now, when we run the code:
 ```
 Received value: A
 Received value: B
@@ -150,7 +151,7 @@ Received value: B
 Perfect.
 
 ## Step 4: Make MySink More Flexible
-So far, we’re just printing values. But we want to allow custom behavior like the original sink. Let's update `MySink` to accept closures:
+So far, we’re just printing values. But we want to allow custom behavior like the original `sink`. Let’s update `MySink` to accept closures:
 ```swift
 final class MySink<Input, Failure>: Subscriber, Cancellable where Failure: Error {
     private let receiveCompletion: (Subscribers.Completion<Failure>) -> Void
@@ -205,6 +206,8 @@ extension Publisher {
 ```
 
 ## Wrapping Up
-And that’s it! We’ve re-implemented the core behavior of Combine’s `Sink` and `sink`. While the real implementation is more complex and handles more edge cases, our version captures the key ideas. Rebuilding components like this is a great way to deepen your understanding of Combine’s architecture.
+And that’s it! We’ve re-implemented the core behavior of Combine’s `Subscribers.Sink` and `sink`. While the real implementation is more complex and handles more edge cases, our version captures the key ideas. Rebuilding components like this is a great way to deepen your understanding of Combine’s architecture.
+
+> **Note:** This is teaching code, not a production-ready subscriber. A robust implementation should reject and cancel any additional subscriptions it receives, and it must synchronize access to its subscription state when cancellation and value delivery can occur concurrently.
 
 👉 You can find the full source code [here](https://github.com/Thieurom/my-swift-playgrounds/tree/master/001-my-sink).

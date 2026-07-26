@@ -18,6 +18,7 @@
     "postcss": "^8.5.23",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "remark-gfm": "^4.0.1",
     "sugar-high": "^1.2.1",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3"

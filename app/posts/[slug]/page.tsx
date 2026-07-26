@@ -93,7 +93,7 @@ export default async function Blog({ params }) {
         <p className="text-sm text-neutral-600 dark:text-neutral-400">
           {formatDate(post.metadata.publishedAt)}
           {post.metadata.updatedAt && (
-            <> · Updated {formatDate(post.metadata.updatedAt)}</>
+            <> · Last updated {formatDate(post.metadata.updatedAt)}</>
           )}
         </p>
       </div>

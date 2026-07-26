@@ -1,6 +1,12 @@
 export function getProjects() {
   return [
     {
+      title: "agent-sessions",
+      year: 2026,
+      description: "CLI tool for browsing, previewing, and resuming local Claude Code and Codex sessions",
+      url: "https://github.com/Thieurom/agent-sessions"
+    },
+    {
       title: "Pilot",
       year: 2022,
       description: "Simple HTTP network layer written in Swift",

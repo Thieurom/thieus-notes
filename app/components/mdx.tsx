@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { MDXRemote } from 'next-mdx-remote/rsc'
+import remarkGfm from 'remark-gfm'
 import { highlight } from 'sugar-high'
 import React from 'react'
 
@@ -44,8 +44,8 @@ function CustomLink(props) {
   return <a target="_blank" rel="noopener noreferrer" {...props} />
 }
 
-function RoundedImage(props) {
-  return <Image alt={props.alt} className="rounded-lg" {...props} />
+function RoundedImage({ alt, ...props }: React.ComponentProps<'img'>) {
+  return <img alt={alt} className="rounded-lg" {...props} />
 }
 
 function Code({ children, ...props }) {
@@ -103,6 +103,11 @@ export function CustomMDX(props) {
   return (
     <MDXRemote
       {...props}
+      options={{
+        mdxOptions: {
+          remarkPlugins: [remarkGfm],
+        },
+      }}
       components={{ ...components, ...(props.components || {}) }}
     />
   )

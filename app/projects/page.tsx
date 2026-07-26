@@ -1,4 +1,4 @@
-import { Projects } from 'app/components/projects'
+import { Projects } from '../components/projects'
 
 export default function Page() {
   return (

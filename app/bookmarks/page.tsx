@@ -1,4 +1,4 @@
-import { Bookmarks } from "app/components/bookmarks"
+import { Bookmarks } from '../components/bookmarks'
 
 export default function Page() {
   return (

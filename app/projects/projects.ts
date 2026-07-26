@@ -1,22 +1,10 @@
 export function getProjects() {
   return [
     {
-      title: "DevSettings",
-      year: 2025,
-      description: "SwiftUI view to manage development settings in your SwiftUI application",
-      url: "https://github.com/Thieurom/DevSettings"
-    },
-    {
-      title: "JourneyLog",
-      year: 2023,
-      description: "Wrapper of os.Logger and OSLogStore to log and export log entries",
-      url: "https://github.com/Thieurom/JourneyLog"
-    },
-    {
-      title: "Landmarks",
-      year: 2023,
-      description: "Rebuild of Apple's \"Landmarks\" application using the Composable Architecture",
-      url: "https://github.com/Thieurom/Landmarks"
+      title: "agent-sessions",
+      year: 2026,
+      description: "CLI tool for browsing, previewing, and resuming local Claude Code and Codex sessions",
+      url: "https://github.com/Thieurom/agent-sessions"
     },
     {
       title: "Pilot",

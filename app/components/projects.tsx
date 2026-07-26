@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getProjects } from 'app/projects/projects'
+import { getProjects } from '../projects/projects'
 
 export function Projects() {
   let projects = getProjects()

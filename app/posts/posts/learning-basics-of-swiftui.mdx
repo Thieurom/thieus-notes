@@ -1,24 +1,24 @@
 ---
 title: Learning the basics of SwiftUI by writing a simple iOS app
 publishedAt: '2020-04-12'
+updatedAt: '2026-07-25'
 tag: swift, swiftui
 ---
 
-I’m currently learning SwiftUI (and Combine).  Both new frameworks from Apple are amazing and pleasant to learn.
+When I wrote this post in 2020, I was learning SwiftUI and Combine. Both frameworks from Apple were amazing and pleasant to learn.
 
-I made an iOS app named The Airliners to practice what I've learned.  It provides brief information on the Boeing 7x7 series aircraft, with all the data I get from Wikipedia.
-
-import Image from 'next/image'
+I made an iOS app named The Airliners to practice what I had learned. It provides brief information about the Boeing 7x7 aircraft series, using data sourced from Wikipedia.
 
 <Image
   src="/images/the-airliners-app-screens.png"
   alt="The Airliners app screenshot"
   width={1125}
   height={750}
-  priority
   className="next-image"
 />
 
-This app is simple now; it has only two screens. For the business logic side, it just applies some SwiftUI syntax like `@State`, `@Environment`, `@ObservedObject`, etc. I plan to add more features as I learn.
+The app was simple at the time, with only two screens. Its business logic used SwiftUI property wrappers such as `@State`, `@Environment`, and `@ObservedObject`. I planned to add more features as I learned.
+
+> **Update (2026):** For new SwiftUI code, prefer the Observation framework where it is available: use `@Observable` models with `@State` for view-owned state and `@Environment` for models supplied by an ancestor. `@StateObject`, `@ObservedObject`, and `@EnvironmentObject` remain appropriate when working with `ObservableObject`-based code.
 
 The source code for the app can be found [here](https://github.com/Thieurom/the-airliners).

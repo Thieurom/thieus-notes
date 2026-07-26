@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
-import { CustomMDX } from 'app/components/mdx'
-import { formatDate, getBlogPosts } from 'app/posts/utils'
-import { baseUrl } from 'app/sitemap'
+import { CustomMDX } from '../../components/mdx'
+import { formatDate, getBlogPosts } from '../utils'
+import { baseUrl } from '../../sitemap'
 
 export async function generateStaticParams() {
   let posts = getBlogPosts()
@@ -11,8 +11,9 @@ export async function generateStaticParams() {
   }))
 }
 
-export function generateMetadata({ params }) {
-  let post = getBlogPosts().find((post) => post.slug === params.slug)
+export async function generateMetadata({ params }) {
+  let { slug } = await params
+  let post = getBlogPosts().find((post) => post.slug === slug)
   if (!post) {
     return
   }
@@ -20,6 +21,7 @@ export function generateMetadata({ params }) {
   let {
     title,
     publishedAt: publishedTime,
+    updatedAt,
     summary: description,
     image,
   } = post.metadata
@@ -35,6 +37,7 @@ export function generateMetadata({ params }) {
       description,
       type: 'article',
       publishedTime,
+      modifiedTime: updatedAt ?? publishedTime,
       url: `${baseUrl}/posts/${post.slug}`,
       images: [
         {
@@ -51,8 +54,9 @@ export function generateMetadata({ params }) {
   }
 }
 
-export default function Blog({ params }) {
-  let post = getBlogPosts().find((post) => post.slug === params.slug)
+export default async function Blog({ params }) {
+  let { slug } = await params
+  let post = getBlogPosts().find((post) => post.slug === slug)
 
   if (!post) {
     notFound()
@@ -69,7 +73,7 @@ export default function Blog({ params }) {
             '@type': 'BlogPosting',
             headline: post.metadata.title,
             datePublished: post.metadata.publishedAt,
-            dateModified: post.metadata.publishedAt,
+            dateModified: post.metadata.updatedAt ?? post.metadata.publishedAt,
             description: post.metadata.summary,
             image: post.metadata.image
               ? `${baseUrl}${post.metadata.image}`
@@ -88,6 +92,9 @@ export default function Blog({ params }) {
       <div className="flex justify-between items-center mt-2 mb-8 text-sm">
         <p className="text-sm text-neutral-600 dark:text-neutral-400">
           {formatDate(post.metadata.publishedAt)}
+          {post.metadata.updatedAt && (
+            <> · Last updated {formatDate(post.metadata.updatedAt)}</>
+          )}
         </p>
       </div>
       <article className="prose">
